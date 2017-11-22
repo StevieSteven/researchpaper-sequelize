@@ -1,5 +1,4 @@
 import conn from './connection';
-// import faker from 'faker';
 import lodash from 'lodash';
 import Sequelize from 'sequelize';
 
@@ -11,6 +10,10 @@ import order from '../models/order';
 import orderStatus from '../models/orderStatus';
 import product from '../models/product';
 import orderItem from '../models/orderItem';
+import rating from '../models/rating';
+import shoppingcardElement from '../models/shoppingcardElement';
+import shoppingcard from '../models/shoppingcard';
+
 
 var Address = address(conn, Sequelize);
 var Category = category(conn, Sequelize);
@@ -19,6 +22,10 @@ var Order = order(conn, Sequelize);
 var OrderStatus = orderStatus(conn, Sequelize);
 var Product = product(conn, Sequelize);
 var OrderItem = orderItem(conn, Sequelize);
+var Rating = rating(conn, Sequelize);
+var ShoppingcardElement = shoppingcardElement(conn, Sequelize);
+var Shoppingcard = shoppingcard(conn, Sequelize);
+
 
 Category.hasOne(Category, {as: 'parent'});
 Customer.hasMany(Address);
@@ -33,8 +40,17 @@ Order.hasMany(OrderItem);
 OrderItem.belongsTo(Order, {as: 'order'});
 OrderItem.belongsTo(Product, {as: 'product'});
 
-
 Product.belongsToMany(Category, {as: 'category', through: 'products_categories'});
+
+Rating.belongsTo(Customer, {as: 'customer'});
+Rating.belongsTo(Product, {as: 'product'});
+
+ShoppingcardElement.belongsTo(Product, {as: 'product'});
+// ShoppingcardElement.belongsTo(Shoppingcard, {as: 'shoppingcard'});
+
+Shoppingcard.hasMany(ShoppingcardElement, {as: 'products'});
+Shoppingcard.belongsTo(Customer, {as: 'customer'});
+
 
 conn.sync({
     force: false
@@ -100,4 +116,35 @@ conn.sync({
         // });
     });
 
+    Rating.findAll().then(ratings => {
+        console.log('Teste Ratings: ');
+        console.log(ratings.length + " Ratings gefunden.");
+        // console.log(ratings[0]);
+        // ratings[0].getCustomer().then(data => {
+        //     console.log(data);
+        // });
+        // ratings[0].getProduct().then(data => {
+        //     console.log(data);
+        // });
+    });
+
+    Shoppingcard.findAll().then(shoppingcards => {
+        console.log("Teste Shoppingcards");
+        console.log(shoppingcards.length + " Shoppingcards gefunden");
+        // shoppingcards[0].getCustomer().then(customer => {
+        //     console.log("Customer gefunden: ", customer);
+        // });
+        // shoppingcards[0].getProducts().then(element => {
+        //     console.log("Element gefunden: " + element.length);
+        // })
+    });
+
+
+    ShoppingcardElement.findAll().then(shoppingcardElements => {
+        console.log("Teste ShoppingcardElements");
+        console.log(shoppingcardElements.length + " ShoppingcardElements gefunden");
+        // shoppingcardElements[0].getProduct().then(element => {
+        //     console.log("Produkt gefunden: " , element)
+        // })
+    });
 });

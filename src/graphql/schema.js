@@ -20,7 +20,7 @@ type Customer {
 	surname: String!
 	email: String!
 	address: [Address!]
-	shoppingcard: Shoppingcard!
+	shoppingcard: Shoppingcard
 	orders: [Order]
 	ratings: [Rating]
 }
@@ -80,7 +80,7 @@ type ShoppingcardElement {
 type RootQuery {
     Customer(id: ID!): Customer
     me: Customer
-    Category(name: String): [Product]
+    Category(name: String): [Category]
     Orders(start: String, end: String): [Order]
 }
 

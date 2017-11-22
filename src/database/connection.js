@@ -1,11 +1,5 @@
-
 import Sequelize from 'sequelize';
 import config from './../../resources/config.json';
-
-// import mode from '../models/alt/mode';
-// import processModel from '../models/alt/process';
-// import state from '../models/alt/state';
-
 import address from '../models/address';
 import category from '../models/category';
 import customer from '../models/customer';
@@ -13,6 +7,9 @@ import order from '../models/order';
 import orderStatus from '../models/orderStatus';
 import product from '../models/product';
 import orderItem from '../models/orderItem';
+import rating from '../models/rating';
+import shoppingcardElement from '../models/shoppingcardElement';
+import shoppingcard from '../models/shoppingcard';
 
 var shortConfig = config[process.argv[2].slice(4)];
 
@@ -31,6 +28,10 @@ const connection = new Sequelize(
 module.exports = connection;
 
 
+// THIS WORKS AS SCHEMA FOR SEQUELIZE TO USE METHODS => connection.models.modelname.findALL()... ... ...
+// ========= START OF SHEMA =========
+
+
 var Address = address(connection, Sequelize);
 var Category = category(connection, Sequelize);
 var Customer = customer(connection, Sequelize);
@@ -38,12 +39,18 @@ var Order = order(connection, Sequelize);
 var OrderStatus = orderStatus(connection, Sequelize);
 var Product = product(connection, Sequelize);
 var OrderItem = orderItem(connection, Sequelize);
+var Rating = rating(connection, Sequelize);
+var ShoppingcardElement = shoppingcardElement(connection, Sequelize);
+var Shoppingcard = shoppingcard(connection, Sequelize);
 
 Category.hasOne(Category, {as: 'parent'});
+Category.belongsToMany(Product, {as: 'product', through: 'products_categories', foreignKey: 'categories_id', timestamps: false });
+
 Customer.hasMany(Address);
 Address.belongsTo(Customer, {as: 'customer'});
 
 Customer.hasMany(Order);
+Customer.hasMany(Rating);
 Order.belongsTo(Customer, {as: 'customer'});
 Order.belongsTo(Address, {as: 'address'});
 Order.belongsTo(OrderStatus, {as: 'status'});
@@ -53,30 +60,19 @@ OrderItem.belongsTo(Order, {as: 'order'});
 OrderItem.belongsTo(Product, {as: 'product'});
 
 //geht noch nicht ganz:
-Product.belongsToMany(Category, {as: 'category', through:'products_categories'});
+Product.belongsToMany(Category, {as: 'category',through:'products_categories', foreignKey: 'product_id', timestamps: false});
+//replaced by:
+// Product.hasMany(CategoryProduct);
+// Category.hasMany(CategoryProduct);
 
-// // THIS WORKS AS SCHEMA FOR SEQUELIZE TO USE METHODS => connection.models.modelname.findALL()... ... ...
-// // ========= START OF SHEMA =========
-// var Mode = mode(connection, Sequelize);
-// var Process = processModel(connection, Sequelize);
-// var State = state(connection, Sequelize);
-//
-//
-//
-//
-// Process.belongsTo(Mode, {as: 'mode'});
-// // Mode.hasMany(Process);
-//
-// State.belongsTo(Process, {as: 'process'});
-// Process.hasMany(State);
-//
-// State.hasOne(Process, {as: 'actual_state'});
-// // Process.belongsTo(State, {as: 'actual_state', constraints: false});
-// // State.belongsTo(State, {as: 'follower'});
+Rating.belongsTo(Customer, {as: 'customer'});
+Rating.belongsTo(Product, {as: 'product'});
+Product.hasMany(Rating);
 
-//TODO.. weitere Beziehungen bauen
-// Article.belongsToMany(Author, {as: 'authors', through:'articleAuthors'});
-// Comment.belongsTo(Article, {as: 'article'});
-// Comment.belongsTo(Author, {as: 'author'});
-// Author.hasMany(Comment);
-// Article.hasMany(Comment);
+ShoppingcardElement.belongsTo(Product, {as: 'product'});
+// ShoppingcardElement.belongsTo(Shoppingcard, {as: 'shoppingcard'});
+
+Shoppingcard.hasMany(ShoppingcardElement, {as: 'products'});
+Shoppingcard.belongsTo(Customer, {as: 'customer'});
+Customer.hasOne(Shoppingcard);
+

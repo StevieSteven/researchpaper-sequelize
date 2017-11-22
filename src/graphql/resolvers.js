@@ -3,152 +3,176 @@
  */
 import conn from './../database/connection';
 
+function printFunctions(model) {
+    for (let m in model) {
+        if (typeof model[m] == "function") {
+            console.log(m);
+        }
+    }
+}
+
 
 const resolveFunctions = {
     RootQuery: {
         me(_) {
-            return "";
+            return conn.models.customer.findOne({where: {id: 1}});
         },
         Customer(_, {id}) {
-            if (!id) {
-                return conn.models.process.findAll();
-            }
-            return conn.models.process.findAll({where: {id: id}});
-            // return conn.models.process.findById(id);
+            return conn.models.customer.findOne({where: {id: id}});
         },
-        Category(_, {start, end}) {
-            // if (!id) {
-            //     return conn.models.mode.findAll();
-            // }
-            return conn.models.mode.findAll({where: {id: id}});
+        Category(_, {name}) {
+            if (!name) {
+                return conn.models.category.findAll();
+            }
+            return conn.models.category.findAll({where: {name: name}});
         },
         Orders(_, {id}) {
             if (!id) {
                 return conn.models.process.findAll();
             }
             return conn.models.process.findAll({where: {id: id}});
-            // return conn.models.process.findById(id);
         }
     },
     RootMutation: {
         putProductIntoShoppingCard: (root, {productId, count}) => {
-            return conn.models.process.findById(processId).then((process) => {
-                return conn.models.mode.findById(modeId).then(mode => {
-                    process.setMode(mode);
-                    return process;
+            let userId = 1;
+
+            return new Promise((resolve, reject) => {
+                return conn.models.customer.findById(userId).then((customer) => {
+                    return customer.getShoppingcard().then((shoppingcard) => {
+                        if (!shoppingcard) {
+                            shoppingcard = conn.models.shoppingcard.build({customer_id: userId}).save()
+                        }
+                        return conn.models.shoppingcardElement.build({
+                            shoppingcard_id: shoppingcard.id,
+                            product_id: productId,
+                            quantity: count
+                        }).save().then((data) => {
+                            return resolve(shoppingcard);
+                        });
+
+                    });
+
                 });
             });
         },
-        finishOrder: (root) => {
+        finishOrder: (root) => { //last todo :)
             return "";
         },
-        addRating:(root, {productId, stars, comment}) => {
-            return "";
+        addRating: (root, {productId, stars, comment}) => {
+            let userId = 1;
+            let t = conn.models.rating.build({
+                comment: comment,
+                stars: stars,
+                customer_id: userId,
+                product_id: productId
+            });
+            return t.save();
         }
     },
     Customer: {
         address: {
             resolve(customer) {
-                return "";
+                return customer.getAddresses();
             }
         },
         shoppingcard: {
             resolve(customer) {
-                return "";
+                return customer.getShoppingcard();
             }
         },
         orders: {
             resolve(customer) {
-                return "";
+                return customer.getOrders();
             }
         },
         ratings: {
             resolve(customer) {
-                return "";
+                return customer.getRatings()
             }
         }
     },
     Shoppingcard: {
         customer: {
             resolve(shoppingcard) {
-                return "";
+                return shoppingcard.getCustomer();
             }
         },
         products: {
             resolve(shoppingcard) {
-                return "";
+                return shoppingcard.getProducts();
             }
         },
     },
     ShoppingcardElement: {
         product: {
             resolve(shoppingcardelement) {
-                return "";
+                return shoppingcardelement.getProduct();
             }
         }
     },
     Product: {
         ratings: {
             resolve(product) {
-                return "";
+                return product.getRatings();
             }
         },
-        categories: {
+        categories: { //doesn't work yet
             resolve(product) {
-                return "";
+                return product.getCategory();
             }
         }
     },
     Rating: {
         customer: {
             resolve(rating) {
-                return "";
+                return rating.getCustomer();
             }
         },
         product: {
             resolve(rating) {
-                return "";
+                return rating.getProduct();
             }
         }
     },
     Category: {
         parent: {
             resolve(category) {
-                return "";
+                return conn.models.category.findById(category.parent_id);
             }
         },
         products: {
             resolve(category) {
-                return "";
+                return category.getProduct();
             }
         }
     },
     Order: {
         items: {
             resolve(order) {
-                return "";
+                return order.getOrderItems();
             }
         },
         customer: {
             resolve(order) {
-                return "";
+                return order.getCustomer();
             }
         },
         address: {
             resolve(order) {
-                return "";
+                return order.getAddress();
             }
         },
         status: {
             resolve(order) {
-                return "";
+                return order.getStatus();
             }
         },
     },
     OrderItem: {
         product: {
             resolve(orderitem) {
-                return "";
+                return orderitem.getProduct();
             }
         }
     }

@@ -11,6 +11,8 @@ function printFunctions(model) {
     }
 }
 
+const userId = 5;
+
 
 const resolveFunctions = {
     RootQuery: {
@@ -35,8 +37,6 @@ const resolveFunctions = {
     },
     RootMutation: {
         putProductIntoShoppingCard: (root, {productId, count}) => {
-            let userId = 1;
-
             return new Promise((resolve, reject) => {
                 return conn.models.customer.findById(userId).then((customer) => {
                     return customer.getShoppingcard().then((shoppingcard) => {
@@ -50,17 +50,46 @@ const resolveFunctions = {
                         }).save().then((data) => {
                             return resolve(shoppingcard);
                         });
-
                     });
-
                 });
             });
         },
-        finishOrder: (root) => { //last todo :)
-            return "";
+        finishOrder: (root, {addressId}) => {
+            return new Promise((resolve, reject) => {
+                return conn.models.customer.findById(userId).then((customer) => {
+                    return customer.getShoppingcard().then((shoppingcard) => {
+                        return shoppingcard.getProducts().then((elements) => {
+                            conn.models.order.build({
+                                customer_id: userId,
+                                address_id: addressId,
+                                date: Date.now(),
+                                status_id: 1
+                            }).save().then((order) => {
+
+                                let argArray = [];
+                                elements.forEach((item) => {
+                                    if (!item.quantity)
+                                        item.quantity = 0;
+                                    argArray.push({
+                                        quantity: item.quantity,
+                                        product_id: item.product_id,
+                                        order_id: order.id
+                                    });
+                                });
+                                conn.models.orderItem.bulkCreate(argArray).then(() => {
+                                    elements.forEach((item) => {
+                                        item.destroy();
+                                    });
+                                    shoppingcard.destroy();
+                                    resolve(order);
+                                })
+                            })
+                        })
+                    })
+                });
+            });
         },
         addRating: (root, {productId, stars, comment}) => {
-            let userId = 1;
             let t = conn.models.rating.build({
                 comment: comment,
                 stars: stars,

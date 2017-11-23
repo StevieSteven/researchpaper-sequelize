@@ -91,7 +91,7 @@ type RootMutation {
         productId: ID!
         count: Int!): Shoppingcard
         
-    finishOrder: Order
+    finishOrder(addressId: ID!): Order
     
     addRating(
         productId: ID!

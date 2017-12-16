@@ -97,6 +97,15 @@ const resolveFunctions = {
                 product_id: productId
             });
             return t.save();
+        },
+        addProduct: (root, {name, price, description, deliveryTime}) => {
+            let p = conn.models.product.build({
+                name: name,
+                delivery_time: deliveryTime,
+                description: description,
+                price: price
+            });
+            return p.save();
         }
     },
     Customer: {

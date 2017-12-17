@@ -44,7 +44,8 @@ var ShoppingcardElement = shoppingcardElement(connection, Sequelize);
 var Shoppingcard = shoppingcard(connection, Sequelize);
 
 Category.hasOne(Category, {as: 'parent'});
-Category.belongsToMany(Product, {as: 'product', through: 'products_categories', foreignKey: 'categories_id', timestamps: false });
+// Category.belongsToMany(Product, {as: 'product', through: 'products_categories', foreignKey: 'categories_id', timestamps: false });
+Category.hasMany(Product);
 
 Customer.hasMany(Address);
 Address.belongsTo(Customer, {as: 'customer'});
@@ -60,7 +61,8 @@ OrderItem.belongsTo(Order, {as: 'order'});
 OrderItem.belongsTo(Product, {as: 'product'});
 
 //geht noch nicht ganz:
-Product.belongsToMany(Category, {as: 'category',through:'products_categories', foreignKey: 'product_id', timestamps: false});
+Product.belongsTo(Category, {as: 'category'});
+// Product.belongsToMany(Category, {as: 'category',through:'products_categories', foreignKey: 'product_id', timestamps: false});
 //replaced by:
 // Product.hasMany(CategoryProduct);
 // Category.hasMany(CategoryProduct);

@@ -155,7 +155,7 @@ const resolveFunctions = {
                 return product.getRatings();
             }
         },
-        categories: { //doesn't work yet
+        category: { //doesn't work yet
             resolve(product) {
                 return product.getCategory();
             }
@@ -181,7 +181,7 @@ const resolveFunctions = {
         },
         products: {
             resolve(category) {
-                return category.getProduct();
+                return category.getProducts();
             }
         }
     },

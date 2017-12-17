@@ -159,6 +159,11 @@ const resolveFunctions = {
             resolve(product) {
                 return product.getCategory();
             }
+        },
+        status: {
+            resolve(product) {
+                return "LIEFERBAR";
+            }
         }
     },
     Rating: {
